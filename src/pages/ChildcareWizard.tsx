@@ -3,7 +3,7 @@ import Step from "../components/organisms/Step";
 import Input from "../components/atoms/Input";
 import { useFormStore } from "../store/formStore";
 
-const formSpec = require("../../childcare_form.json");
+import formSpec from "../../childcare_form.json";
 
 function ConsentStep() {
   return (
