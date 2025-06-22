@@ -3,16 +3,20 @@
   "version": "1.0.0",
   "description": "Multi-step guided intake UI for childcare applications",
   "scripts": {
-    "test": "playwright test"
+    "test": "playwright test",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "zustand": "^4.4.1",
-    "@city-civics/design-system": "^1.0.0"
+    "zustand": "^4.4.1"
   },
   "devDependencies": {
     "typescript": "^5.2.2",
-    "playwright": "^1.42.0"
+    "@playwright/test": "^1.42.0",
+    "vite": "^5.0.0",
+    "@vitejs/plugin-react": "^4.1.0"
   }
 }
