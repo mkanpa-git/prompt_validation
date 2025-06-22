@@ -1,30 +1,8 @@
+import React from 'react';
 import Step from './organisms/Step';
 import Input from './atoms/Input';
 import { useFormStore } from '../store/formStore';
-
-interface Condition {
-  field: string;
-  operator: 'equals' | 'includes';
-  value: unknown;
-}
-
-function evaluateCondition(
-  cond: undefined | Condition | { condition?: Condition }
-): boolean {
-  const { formData } = useFormStore.getState();
-  if (!cond) return true;
-  const c = (cond as any).field ? (cond as Condition) : (cond as any).condition;
-  if (!c) return true;
-  const val = (formData as any)[c.field];
-  switch (c.operator) {
-    case 'equals':
-      return val === c.value;
-    case 'includes':
-      return Array.isArray(val) && val.includes(c.value);
-    default:
-      return true;
-  }
-}
+import { evaluateCondition, Condition } from '../utils/conditions';
 
 interface FieldSpec {
   id: string;
@@ -33,15 +11,35 @@ interface FieldSpec {
   fields?: FieldSpec[];
   ui?: { options?: any[] };
   metadata?: { multiple?: boolean };
+  required?: boolean;
+  requiredCondition?: Condition | { condition?: Condition };
   visibilityCondition?: Condition;
 }
 
 function FieldRenderer({ field }: { field: FieldSpec }) {
-  const { formData, updateField } = useFormStore();
-  if (!evaluateCondition(field.visibilityCondition)) return null;
-
-  const value = (formData as any)[field.id] ?? '';
+  const { formData, updateField, setFieldValid } = useFormStore();
+  const visible = evaluateCondition(formData, field.visibilityCondition);
+  const required =
+    field.required || evaluateCondition(formData, field.requiredCondition);
+  const value = (formData as any)[field.id];
   const opts = field.ui?.options || [];
+
+  React.useEffect(() => {
+    if (!visible || !required) {
+      setFieldValid(field.id, true);
+      return;
+    }
+    if (Array.isArray(value)) {
+      setFieldValid(field.id, value.length > 0);
+    } else {
+      setFieldValid(
+        field.id,
+        value !== undefined && value !== null && value !== ''
+      );
+    }
+  }, [visible, required, value, field.id, setFieldValid]);
+
+  if (!visible) return null;
 
   switch (field.type) {
     case 'radio':
@@ -147,7 +145,8 @@ interface SectionSpec {
 }
 
 function SectionRenderer({ section }: { section: SectionSpec }) {
-  if (!evaluateCondition(section.visibilityCondition)) return null;
+  const { formData } = useFormStore();
+  if (!evaluateCondition(formData, section.visibilityCondition)) return null;
 
   if (section.type === 'info') {
     return (
@@ -176,7 +175,8 @@ interface StepSpec {
 }
 
 export default function StepRenderer({ step }: { step: StepSpec }) {
-  if (!evaluateCondition(step.visibilityCondition)) return null;
+  const { formData } = useFormStore();
+  if (!evaluateCondition(formData, step.visibilityCondition)) return null;
   return (
     <Step id={step.id} title={step.title}>
       {step.sections.map((s) => (
