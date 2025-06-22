@@ -8,23 +8,24 @@ interface StepperProps {
 
 export default function Stepper({ steps }: StepperProps) {
   const { stepIndex, next, prev } = useFormStore();
-  const step = steps[stepIndex];
+  const clampedIndex = Math.min(stepIndex, steps.length - 1);
+  const step = steps[clampedIndex];
 
   return (
     <div>
       <div role="navigation" aria-label="form-stepper">
         {steps.map((s, i) => (
-          <span key={s.id} style={{ marginRight: 8, fontWeight: i === stepIndex ? 'bold' : 'normal' }}>
+          <span key={s.id} style={{ marginRight: 8, fontWeight: i === clampedIndex ? 'bold' : 'normal' }}>
             {s.title}
           </span>
         ))}
       </div>
       <div>{step.content}</div>
       <div style={{ marginTop: 16 }}>
-        <Button onClick={prev} disabled={stepIndex === 0} aria-label="Previous step">
+        <Button onClick={prev} disabled={clampedIndex === 0} aria-label="Previous step">
           Back
         </Button>
-        <Button onClick={next} aria-label="Next step" style={{ marginLeft: 8 }}>
+        <Button onClick={next} disabled={clampedIndex === steps.length - 1} aria-label="Next step" style={{ marginLeft: 8 }}>
           Next
         </Button>
       </div>

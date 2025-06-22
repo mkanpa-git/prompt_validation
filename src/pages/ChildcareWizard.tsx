@@ -1,53 +1,27 @@
 import Stepper from "../components/molecules/Stepper";
-import Step from "../components/organisms/Step";
-import Input from "../components/atoms/Input";
+import StepRenderer from "../components/FormRenderer";
 import { useFormStore } from "../store/formStore";
 
 import formSpec from "../../childcare_form.json";
 
-function ConsentStep() {
-  return (
-    <Step id="consent" title="Consent">
-      <p>{formSpec.form.steps[0].sections[0].content}</p>
-    </Step>
-  );
-}
-
-function InstructionsStep() {
-  return (
-    <Step id="instructions" title="Instructions">
-      <p>{formSpec.form.steps[1].sections[0].content}</p>
-    </Step>
-  );
-}
-
-function ApplicantInfoStep() {
-  const { updateField, formData } = useFormStore();
-  return (
-    <Step id="applicant" title="Applicant Info">
-      <label htmlFor="firstName">First Name</label>
-      <Input
-        id="firstName"
-        value={(formData as any).firstName || ""}
-        onChange={(e) => updateField("firstName", e.target.value)}
-      />
-    </Step>
-  );
-}
-
 export default function ChildcareWizard() {
-  const steps = [
-    { id: "consent", title: "Consent", content: <ConsentStep /> },
-    {
-      id: "instructions",
-      title: "Instructions",
-      content: <InstructionsStep />,
-    },
-    {
-      id: "applicant",
-      title: "Applicant Info",
-      content: <ApplicantInfoStep />,
-    },
-  ];
+  const { formData } = useFormStore();
+
+  const steps = formSpec.form.steps
+    .filter((s: any) => {
+      const cond = (s as any).visibilityCondition;
+      if (!cond) return true;
+      const val = (formData as any)[cond.field];
+      if (cond.operator === "equals") return val === cond.value;
+      if (cond.operator === "includes")
+        return Array.isArray(val) && val.includes(cond.value);
+      return true;
+    })
+    .map((step: any) => ({
+      id: step.id,
+      title: step.title,
+      content: <StepRenderer step={step} />,
+    }));
+
   return <Stepper steps={steps} />;
 }
