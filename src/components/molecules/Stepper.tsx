@@ -1,4 +1,4 @@
-import { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect, useRef } from 'react';
 import Button from '../atoms/Button';
 import { useFormStore } from '../../store/formStore';
 import { evaluateCondition } from '../../utils/conditions';
@@ -10,6 +10,8 @@ interface StepperProps {
 
 export default function Stepper({ steps }: StepperProps) {
   const { stepIndex, next, prev, formData, fieldValid } = useFormStore();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const stepRef = useRef<HTMLElement>(null);
 
   const getRequiredFields = (spec: any): string[] => {
     const ids: string[] = [];
@@ -43,8 +45,29 @@ export default function Stepper({ steps }: StepperProps) {
     saveDraft('draft', { formData, stepIndex });
   }, [stepIndex, formData]);
 
+  useEffect(() => {
+    const el = stepRef.current?.querySelector<HTMLElement>(
+      'input, select, textarea, button, [tabindex]:not([tabindex="-1"])',
+    );
+    el?.focus();
+  }, [clampedIndex]);
+
   return (
-    <div>
+    <div
+      ref={containerRef}
+      className="stepper-container"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'ArrowLeft') {
+          prev();
+          e.preventDefault();
+        }
+        if (e.key === 'ArrowRight' && !disableNext) {
+          next();
+          e.preventDefault();
+        }
+      }}
+    >
       <nav role="navigation" aria-label="form-stepper">
         <ul className="stepper">
           {steps.map((s, i) => (
@@ -54,13 +77,13 @@ export default function Stepper({ steps }: StepperProps) {
           ))}
         </ul>
       </nav>
-      <div>{step.content}</div>
-      <div style={{ marginTop: 16 }}>
+      <div ref={stepRef}>{step.content}</div>
+      <div className="step-actions" role="group" aria-label="wizard actions">
         <Button onClick={prev} disabled={clampedIndex === 0} aria-label="Previous step">
           Back
         </Button>
         {!isLastStep && (
-          <Button onClick={next} disabled={disableNext} aria-label="Next step" style={{ marginLeft: 8 }}>
+          <Button onClick={next} disabled={disableNext} aria-label="Next step">
             Next
           </Button>
         )}
@@ -69,7 +92,6 @@ export default function Stepper({ steps }: StepperProps) {
             onClick={() => submitApplication('draft', formData as any)}
             disabled={!allValid}
             aria-label="Submit application"
-            style={{ marginLeft: 8 }}
           >
             Submit
           </Button>
@@ -77,7 +99,6 @@ export default function Stepper({ steps }: StepperProps) {
         <Button
           onClick={() => saveDraft('draft', { formData, stepIndex })}
           aria-label="Save draft"
-          style={{ marginLeft: 8 }}
         >
           Save for later
         </Button>
