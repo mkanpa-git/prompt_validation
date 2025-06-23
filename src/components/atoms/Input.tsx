@@ -1,5 +1,9 @@
 import { InputHTMLAttributes } from 'react';
 
-export default function Input(props: InputHTMLAttributes<HTMLInputElement>) {
-  return <input {...props} />;
+interface Props extends InputHTMLAttributes<HTMLInputElement> {
+  className?: string;
+}
+export default function Input({ className, ...rest }: Props) {
+  const classes = ['input', className].filter(Boolean).join(' ');
+  return <input className={classes} {...rest} />;
 }
