@@ -29,12 +29,18 @@ test('resume from saved draft', async ({ page }) => {
   await page.goto('http://localhost:3000');
   await page.getByRole('button', { name: /next step/i }).click();
   await page.getByRole('button', { name: /next step/i }).click();
+  await expect(
+    page.getByRole('listitem', { name: 'Applicant' }),
+  ).toHaveAttribute('aria-current', 'step');
+
   await page.getByLabel('First Name').fill('John');
   await page.getByLabel('Last Name').fill('Doe');
-  await page.getByRole('button', { name: /save for later/i }).click();
 
-  // Reload should restore state
+  // Reload should restore state and step position
   await page.reload();
+  await expect(
+    page.getByRole('listitem', { name: 'Applicant' }),
+  ).toHaveAttribute('aria-current', 'step');
   await expect(page.getByLabel('First Name')).toHaveValue('John');
 });
 
