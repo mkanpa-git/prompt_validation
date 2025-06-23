@@ -7,7 +7,7 @@ export interface FormState {
   formData: Record<string, unknown>;
   fieldValid: Record<string, boolean>;
   role: Role;
-  loadDraft: (data: Record<string, unknown>) => void;
+  loadDraft: (data: { formData: Record<string, unknown>; stepIndex?: number }) => void;
   updateField: (path: string, value: unknown) => void;
   setFieldValid: (path: string, valid: boolean) => void;
   next: () => void;
@@ -19,7 +19,8 @@ export const useFormStore = create<FormState>((set) => ({
   formData: {},
   fieldValid: {},
   role: 'applicant',
-  loadDraft: (data) => set({ formData: data }),
+  loadDraft: (data) =>
+    set({ formData: data.formData, stepIndex: data.stepIndex ?? 0 }),
   updateField: (path, value) =>
     set((state) => ({ formData: { ...state.formData, [path]: value } })),
   setFieldValid: (path, valid) =>
