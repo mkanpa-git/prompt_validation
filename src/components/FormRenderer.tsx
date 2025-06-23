@@ -44,13 +44,13 @@ function FieldRenderer({ field }: { field: FieldSpec }) {
   switch (field.type) {
     case 'radio':
       return (
-        <fieldset>
-          <legend>{field.label}</legend>
+        <fieldset role="radiogroup" aria-required={required}>
+          <legend id={`${field.id}-legend`}>{field.label}</legend>
           {opts.map((o: any) => {
             const val = typeof o === 'string' ? o : o.value;
             const lbl = typeof o === 'string' ? o : o.label;
             return (
-              <label key={val} style={{ marginRight: 8 }}>
+              <label key={val} className="option-label">
                 <input
                   type="radio"
                   name={field.id}
@@ -73,6 +73,7 @@ function FieldRenderer({ field }: { field: FieldSpec }) {
             value={value}
             aria-required={required}
             required={required}
+            aria-label={field.label}
             onChange={(e) => updateField(field.id, e.target.value)}
           >
             <option value="">Select...</option>
@@ -91,14 +92,14 @@ function FieldRenderer({ field }: { field: FieldSpec }) {
     case 'checkbox':
       const arr = Array.isArray(value) ? value : [];
       return (
-        <fieldset>
-          <legend>{field.label}</legend>
+        <fieldset role="group" aria-required={required}>
+          <legend id={`${field.id}-legend`}>{field.label}</legend>
           {opts.map((o: any) => {
             const val = typeof o === 'string' ? o : o.value;
             const lbl = typeof o === 'string' ? o : o.label;
             const checked = arr.includes(val);
             return (
-              <label key={val} style={{ marginRight: 8 }}>
+              <label key={val} className="option-label">
                 <input
                   type="checkbox"
                   value={val}
@@ -132,6 +133,7 @@ function FieldRenderer({ field }: { field: FieldSpec }) {
             value={value as any}
             aria-required={required}
             required={required}
+            aria-label={field.label}
             onChange={(e) => updateField(field.id, e.target.value)}
           />
         </div>
@@ -154,7 +156,7 @@ function SectionRenderer({ section }: { section: SectionSpec }) {
 
   if (section.type === 'info') {
     return (
-      <section id={section.id} style={{ marginBottom: '1rem' }}>
+      <section id={section.id} className="step-section">
         {section.title && <h3>{section.title}</h3>}
         <p>{section.content}</p>
       </section>
@@ -162,7 +164,7 @@ function SectionRenderer({ section }: { section: SectionSpec }) {
   }
 
   return (
-    <section id={section.id} style={{ marginBottom: '1rem' }}>
+    <section id={section.id} className="step-section">
       {section.title && <h3>{section.title}</h3>}
       {section.fields?.map((f) => (
         <FieldRenderer key={f.id} field={f} />
@@ -178,14 +180,18 @@ interface StepSpec {
   visibilityCondition?: Condition;
 }
 
-export default function StepRenderer({ step }: { step: StepSpec }) {
-  const { formData } = useFormStore();
-  if (!evaluateCondition(formData, step.visibilityCondition)) return null;
-  return (
-    <Step id={step.id} title={step.title}>
-      {step.sections.map((s) => (
-        <SectionRenderer key={s.id} section={s} />
-      ))}
-    </Step>
-  );
-}
+const StepRenderer = React.forwardRef<HTMLElement, { step: StepSpec }>(
+  ({ step }, ref) => {
+    const { formData } = useFormStore();
+    if (!evaluateCondition(formData, step.visibilityCondition)) return null;
+    return (
+      <Step id={step.id} title={step.title} ref={ref}>
+        {step.sections.map((s) => (
+          <SectionRenderer key={s.id} section={s} />
+        ))}
+      </Step>
+    );
+  },
+);
+
+export default StepRenderer;

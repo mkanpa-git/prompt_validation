@@ -40,3 +40,33 @@
 .stepper li[aria-current='step'] {
   font-weight: bold;
 }
+
+.stepper-container:focus {
+  outline: none;
+}
+
+.step {
+  margin-bottom: 2rem;
+}
+
+.step-section {
+  margin-bottom: 1rem;
+}
+
+.option-label {
+  margin-right: 0.5rem;
+}
+
+.step-actions {
+  margin-top: 1rem;
+}
+
+.step-actions .btn + .btn {
+  margin-left: 0.5rem;
+}
+
+@media (max-width: 600px) {
+  .stepper {
+    flex-wrap: wrap;
+  }
+}
