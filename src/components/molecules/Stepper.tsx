@@ -2,7 +2,7 @@ import { ReactNode, useEffect } from 'react';
 import Button from '../atoms/Button';
 import { useFormStore } from '../../store/formStore';
 import { evaluateCondition } from '../../utils/conditions';
-import { saveDraft } from '../../services/persistence';
+import { saveDraft, submitApplication } from '../../services/persistence';
 
 interface StepperProps {
   steps: { id: string; title: string; content: ReactNode; spec: any }[];
@@ -37,6 +37,7 @@ export default function Stepper({ steps }: StepperProps) {
   const requiredIds = getRequiredFields(step.spec);
   const allValid = requiredIds.every((id) => fieldValid[id]);
   const disableNext = clampedIndex === steps.length - 1 || !allValid;
+  const isLastStep = clampedIndex === steps.length - 1;
 
   useEffect(() => {
     saveDraft('draft', { formData, stepIndex });
@@ -58,9 +59,21 @@ export default function Stepper({ steps }: StepperProps) {
         <Button onClick={prev} disabled={clampedIndex === 0} aria-label="Previous step">
           Back
         </Button>
-        <Button onClick={next} disabled={disableNext} aria-label="Next step" style={{ marginLeft: 8 }}>
-          Next
-        </Button>
+        {!isLastStep && (
+          <Button onClick={next} disabled={disableNext} aria-label="Next step" style={{ marginLeft: 8 }}>
+            Next
+          </Button>
+        )}
+        {isLastStep && (
+          <Button
+            onClick={() => submitApplication('draft', formData as any)}
+            disabled={!allValid}
+            aria-label="Submit application"
+            style={{ marginLeft: 8 }}
+          >
+            Submit
+          </Button>
+        )}
         <Button
           onClick={() => saveDraft('draft', { formData, stepIndex })}
           aria-label="Save draft"
