@@ -1,12 +1,20 @@
+import React from "react";
 import Stepper from "../components/molecules/Stepper";
 import StepRenderer from "../components/FormRenderer";
 import { useFormStore } from "../store/formStore";
 import { evaluateCondition } from "../utils/conditions";
+import { loadDraft as fetchDraft } from "../services/persistence";
 
 import formSpec from "../../childcare_form.json";
 
 export default function ChildcareWizard() {
-  const { formData } = useFormStore();
+  const { formData, loadDraft } = useFormStore();
+
+  React.useEffect(() => {
+    fetchDraft().then((data) => {
+      if (data) loadDraft(data);
+    });
+  }, [loadDraft]);
 
   const visibleSteps = formSpec.form.steps.filter((s: any) =>
     evaluateCondition(formData, s.visibilityCondition)

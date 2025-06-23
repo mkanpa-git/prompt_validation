@@ -1,7 +1,8 @@
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import Button from '../atoms/Button';
 import { useFormStore } from '../../store/formStore';
 import { evaluateCondition } from '../../utils/conditions';
+import { saveDraft } from '../../services/persistence';
 
 interface StepperProps {
   steps: { id: string; title: string; content: ReactNode; spec: any }[];
@@ -37,6 +38,10 @@ export default function Stepper({ steps }: StepperProps) {
   const allValid = requiredIds.every((id) => fieldValid[id]);
   const disableNext = clampedIndex === steps.length - 1 || !allValid;
 
+  useEffect(() => {
+    saveDraft('draft', { formData, stepIndex });
+  }, [stepIndex, formData]);
+
   return (
     <div>
       <div role="navigation" aria-label="form-stepper">
@@ -53,6 +58,13 @@ export default function Stepper({ steps }: StepperProps) {
         </Button>
         <Button onClick={next} disabled={disableNext} aria-label="Next step" style={{ marginLeft: 8 }}>
           Next
+        </Button>
+        <Button
+          onClick={() => saveDraft('draft', { formData, stepIndex })}
+          aria-label="Save draft"
+          style={{ marginLeft: 8 }}
+        >
+          Save for later
         </Button>
       </div>
     </div>
