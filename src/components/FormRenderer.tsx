@@ -71,6 +71,8 @@ function FieldRenderer({ field }: { field: FieldSpec }) {
           <select
             id={field.id}
             value={value}
+            aria-required={required}
+            required={required}
             onChange={(e) => updateField(field.id, e.target.value)}
           >
             <option value="">Select...</option>
@@ -128,6 +130,8 @@ function FieldRenderer({ field }: { field: FieldSpec }) {
             id={field.id}
             type={type as any}
             value={value as any}
+            aria-required={required}
+            required={required}
             onChange={(e) => updateField(field.id, e.target.value)}
           />
         </div>

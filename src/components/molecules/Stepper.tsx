@@ -44,13 +44,15 @@ export default function Stepper({ steps }: StepperProps) {
 
   return (
     <div>
-      <div role="navigation" aria-label="form-stepper">
-        {steps.map((s, i) => (
-          <span key={s.id} style={{ marginRight: 8, fontWeight: i === clampedIndex ? 'bold' : 'normal' }}>
-            {s.title}
-          </span>
-        ))}
-      </div>
+      <nav role="navigation" aria-label="form-stepper">
+        <ul className="stepper">
+          {steps.map((s, i) => (
+            <li key={s.id} aria-current={i === clampedIndex ? 'step' : undefined}>
+              {s.title}
+            </li>
+          ))}
+        </ul>
+      </nav>
       <div>{step.content}</div>
       <div style={{ marginTop: 16 }}>
         <Button onClick={prev} disabled={clampedIndex === 0} aria-label="Previous step">
